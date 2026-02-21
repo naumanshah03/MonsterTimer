@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.monstertimer.app.data.PersistentTimerStateTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-02-21T19:53:50" hostname="139163-P14S" time="0.011">
+  <properties/>
+  <testcase name="default values work correctly" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.003"/>
+  <testcase name="getAdjustedRemainingMillis subtracts elapsed time when active" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.005"/>
+  <testcase name="getAdjustedRemainingMillis handles very recent update" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.001"/>
+  <testcase name="getAdjustedRemainingMillis does not go negative" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.0"/>
+  <testcase name="getAdjustedRemainingMillis handles zero remaining time" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.0"/>
+  <testcase name="copy preserves all fields correctly" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.0"/>
+  <testcase name="getAdjustedRemainingMillis returns original when not active" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.001"/>
+  <testcase name="inactive timer with elapsed time is handled correctly" classname="com.monstertimer.app.data.PersistentTimerStateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

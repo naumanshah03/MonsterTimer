@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Theme -->
+    <style name="Theme.MonsterTimer" parent="Theme.Material3.Dark.NoActionBar">
+        <!-- Primary Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_variant</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        
+        <!-- Secondary Colors -->
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_variant</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        
+        <!-- Background & Surface -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/background</item>
+        <item name="android:navigationBarColor">@color/background</item>
+        
+        <!-- Error -->
+        <item name="colorError">@color/error</item>
+        
+        <!-- Component Styles -->
+        <item name="materialCardViewStyle">@style/Widget.MonsterTimer.Card</item>
+        <item name="materialButtonStyle">@style/Widget.MonsterTimer.Button</item>
+        <item name="textInputStyle">@style/Widget.MonsterTimer.TextInputLayout</item>
+        <item name="sliderStyle">@style/Widget.MonsterTimer.Slider</item>
+    </style>
+    
+    <!-- Card Style -->
+    <style name="Widget.MonsterTimer.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardCornerRadius">@dimen/corner_radius_large</item>
+        <item name="cardElevation">@dimen/elevation_medium</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/card_stroke</item>
+    </style>
+
+    <!-- Section Card (variant with header) -->
+    <style name="Widget.MonsterTimer.Card.Section">
+        <item name="cardCornerRadius">@dimen/corner_radius_medium</item>
+        <item name="contentPadding">0dp</item>
+    </style>
+    
+    <!-- Primary Button -->
+    <style name="Widget.MonsterTimer.Button" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/button_primary</item>
+        <item name="android:textColor">@color/on_primary</item>
+        <item name="cornerRadius">@dimen/corner_radius_medium</item>
+        <item name="android:paddingTop">14dp</item>
+        <item name="android:paddingBottom">14dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0.02</item>
+    </style>
+    
+    <!-- Secondary Button -->
+    <style name="Widget.MonsterTimer.Button.Secondary" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/button_secondary</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="cornerRadius">@dimen/corner_radius_medium</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    
+    <!-- Outlined Button -->
+    <style name="Widget.MonsterTimer.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/primary</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="cornerRadius">@dimen/corner_radius_medium</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+    
+    <!-- Text Input -->
+    <style name="Widget.MonsterTimer.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/primary</item>
+        <item name="boxCornerRadiusTopStart">@dimen/corner_radius_small</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/corner_radius_small</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/corner_radius_small</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/corner_radius_small</item>
+        <item name="hintTextColor">@color/text_tertiary</item>
+        <item name="boxBackgroundColor">@color/surface_variant</item>
+    </style>
+    
+    <!-- Slider -->
+    <style name="Widget.MonsterTimer.Slider" parent="Widget.Material3.Slider">
+        <item name="thumbColor">@color/primary</item>
+        <item name="trackColorActive">@color/primary</item>
+        <item name="trackColorInactive">@color/surface_variant</item>
+        <item name="haloColor">@color/primary</item>
+    </style>
+    
+    <!-- Text Styles -->
+    <style name="TextAppearance.MonsterTimer.Headline" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="TextAppearance.MonsterTimer.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="TextAppearance.MonsterTimer.SectionTitle" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+    
+    <style name="TextAppearance.MonsterTimer.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    
+    <style name="TextAppearance.MonsterTimer.Caption" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/text_tertiary</item>
+    </style>
+    
+    <style name="TextAppearance.MonsterTimer.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.1</item>
+    </style>
+    
+    <!-- Checkbox Style -->
+    <style name="Widget.MonsterTimer.Checkbox" parent="Widget.Material3.CompoundButton.CheckBox">
+        <item name="buttonTint">@color/primary</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    
+    <!-- Shape for Rounded Images -->
+    <style name="ShapeAppearance.MonsterTimer.RoundedImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">@dimen/corner_radius_medium</item>
+    </style>
+</resources>

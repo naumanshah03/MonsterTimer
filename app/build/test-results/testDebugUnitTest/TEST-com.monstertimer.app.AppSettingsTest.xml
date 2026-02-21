@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.monstertimer.app.AppSettingsTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-02-21T19:53:46" hostname="139163-P14S" time="0.075">
+  <properties/>
+  <testcase name="custom values are preserved" classname="com.monstertimer.app.AppSettingsTest" time="0.062"/>
+  <testcase name="copy creates proper copy with modified fields" classname="com.monstertimer.app.AppSettingsTest" time="0.0"/>
+  <testcase name="empty monster paths list is valid" classname="com.monstertimer.app.AppSettingsTest" time="0.002"/>
+  <testcase name="timer minutes can be set to valid presets" classname="com.monstertimer.app.AppSettingsTest" time="0.001"/>
+  <testcase name="hashCode is consistent with equals" classname="com.monstertimer.app.AppSettingsTest" time="0.0"/>
+  <testcase name="equality is based on all fields" classname="com.monstertimer.app.AppSettingsTest" time="0.0"/>
+  <testcase name="default constructor sets reasonable defaults" classname="com.monstertimer.app.AppSettingsTest" time="0.001"/>
+  <testcase name="pin can be any 4 digit combination" classname="com.monstertimer.app.AppSettingsTest" time="0.0"/>
+  <testcase name="monsterPaths can be modified via copy" classname="com.monstertimer.app.AppSettingsTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
