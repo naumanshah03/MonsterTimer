@@ -170,8 +170,10 @@ class ShortsAccessibilityService : AccessibilityService() {
         Log.d(TAG, "Restored timer state: ${currentRemainingMillis / 1000}s remaining")
 
         if (currentRemainingMillis <= 0 && state.isActive) {
-            Log.d(TAG, "Timer expired while app was closed - showing monster")
-            showMonsterOverlay()
+            Log.d(TAG, "Timer expired from previous session. Clearing state instead of showing monster on connect.")
+            PersistentTimerState.clear(this)
+            currentRemainingMillis = 0
+            isTimerRunning = false
         }
     }
 

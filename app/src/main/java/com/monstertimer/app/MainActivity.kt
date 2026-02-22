@@ -68,11 +68,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initViews()
+        loadSettings()
+        setupUI()
+
         val settings = AppSettings.load(this)
         if (!settings.eulaAccepted) {
             showEulaDialog()
         } else {
-            initializeApp()
+            checkPermissions()
         }
     }
 
@@ -92,20 +96,15 @@ class MainActivity : AppCompatActivity() {
             .setCancelable(false)
             .setPositiveButton("I Accept") { _, _ ->
                 val s = AppSettings.load(this)
-                AppSettings.save(this, s.copy(eulaAccepted = true))
-                initializeApp()
+                val newSettings = s.copy(eulaAccepted = true)
+                AppSettings.save(this, newSettings)
+                currentSettings = newSettings
+                checkPermissions()
             }
             .setNegativeButton("Decline") { _, _ ->
                 finish()
             }
             .show()
-    }
-
-    private fun initializeApp() {
-        initViews()
-        loadSettings()
-        setupUI()
-        checkPermissions()
     }
 
     override fun onResume() {
