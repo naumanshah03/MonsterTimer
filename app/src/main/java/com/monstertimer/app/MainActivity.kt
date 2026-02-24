@@ -64,6 +64,14 @@ class MainActivity : AppCompatActivity() {
         uri?.let { addMonsterFromUri(it) }
     }
 
+    private val requestPermissionsLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { _ ->
+        // Permissions dialog closed. 
+        // We can do something here if we need to, but simply letting them 
+        // see the statuses on the UI is enough for now.
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -326,9 +334,7 @@ class MainActivity : AppCompatActivity() {
                 ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
             }
             if (needed.isNotEmpty()) {
-                registerForActivityResult(
-                    ActivityResultContracts.RequestMultiplePermissions()
-                ) { }.launch(needed.toTypedArray())
+                requestPermissionsLauncher.launch(needed.toTypedArray())
             }
         }
     }
