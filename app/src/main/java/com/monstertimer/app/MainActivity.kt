@@ -1,6 +1,7 @@
 package com.monstertimer.app
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
@@ -82,11 +84,14 @@ class MainActivity : AppCompatActivity() {
         loadSettings()
         setupUI()
 
+        // Hide settings until authenticated
+        findViewById<View>(R.id.mainContentScroll).visibility = View.INVISIBLE
+
         val settings = AppSettings.load(this)
         if (!settings.eulaAccepted) {
             showEulaDialog()
         } else {
-            checkPermissions()
+            showAppLockDialog()
         }
     }
 
@@ -109,12 +114,52 @@ class MainActivity : AppCompatActivity() {
                 val newSettings = s.copy(eulaAccepted = true)
                 AppSettings.save(this, newSettings)
                 currentSettings = newSettings
-                checkPermissions()
+                // After EULA accepted, go to app lock
+                showAppLockDialog()
             }
             .setNegativeButton("Decline") { _, _ ->
                 finish()
             }
             .show()
+    }
+
+    private fun showAppLockDialog() {
+        val pinInput = EditText(this).apply {
+            hint = "Enter Parent PIN"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            filters = arrayOf(android.text.InputFilter.LengthFilter(4))
+            setPadding(64, 32, 64, 32)
+            setTextSize(20f)
+        }
+
+        val dialog = AlertDialog.Builder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog)
+            .setTitle("\uD83D\uDD12 App Locked")
+            .setMessage("Enter the parent PIN to access settings.")
+            .setView(pinInput as View)
+            .setCancelable(false)
+            .setPositiveButton("Unlock", null) // Set null; we override below to prevent auto-dismiss
+            .setNegativeButton("Exit") { d: DialogInterface, _: Int ->
+                finish()
+            }
+            .create()
+
+        dialog.setOnShowListener {
+            val unlockButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            unlockButton.setOnClickListener {
+                val enteredPin = pinInput.text.toString()
+                if (enteredPin == currentSettings.parentPin) {
+                    dialog.dismiss()
+                    // Reveal settings
+                    findViewById<View>(R.id.mainContentScroll).visibility = View.VISIBLE
+                    checkPermissions()
+                } else {
+                    pinInput.error = "Wrong PIN"
+                    pinInput.setText("")
+                }
+            }
+        }
+
+        dialog.show()
     }
 
     override fun onResume() {
