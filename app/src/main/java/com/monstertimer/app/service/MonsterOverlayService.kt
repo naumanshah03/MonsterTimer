@@ -334,6 +334,8 @@ class MonsterOverlayService : Service() {
                 Log.d(TAG, "Disable Monitoring tapped")
                 val settings = AppSettings.load(this@MonsterOverlayService)
                 AppSettings.save(this@MonsterOverlayService, settings.copy(monitoringEnabled = false))
+                // Update cached flag so service stops immediately
+                ShortsAccessibilityService.monitoringEnabled = false
                 dismissOverlay()
             }
         }

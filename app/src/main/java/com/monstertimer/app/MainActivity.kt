@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     private val monsterAdapter = MonsterGalleryAdapter()
     private var currentSettings = AppSettings()
+    private var isLoadingSettings = false
     
     private val timerPresets = listOf(5, 10, 15, 20, 30)
 
@@ -253,6 +254,7 @@ class MainActivity : AppCompatActivity() {
 
         // Monitoring toggle - saves immediately and updates service cache
         monitoringSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isLoadingSettings) return@setOnCheckedChangeListener
             currentSettings = currentSettings.copy(monitoringEnabled = isChecked)
             AppSettings.save(this, currentSettings)
             ShortsAccessibilityService.monitoringEnabled = isChecked
@@ -262,6 +264,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadSettings() {
+        isLoadingSettings = true
         currentSettings = AppSettings.load(this)
 
         if (currentSettings.isManualTimer) {
@@ -283,6 +286,7 @@ class MainActivity : AppCompatActivity() {
         pinEditText.setText(currentSettings.parentPin)
         monsterAdapter.updateData(currentSettings.monsterPaths)
         monitoringSwitch.isChecked = currentSettings.monitoringEnabled
+        isLoadingSettings = false
     }
 
     private fun saveSettings() {
@@ -302,7 +306,12 @@ class MainActivity : AppCompatActivity() {
 
         val isManual = manualRadioButton.isChecked
         val timerMinutes = if (isManual) {
-            manualTimerEditText.text.toString().toIntOrNull() ?: currentSettings.timerMinutes
+            val value = manualTimerEditText.text.toString().toIntOrNull()
+            if (value == null || value < 1 || value > 120) {
+                Toast.makeText(this, "Timer must be between 1 and 120 minutes", Toast.LENGTH_SHORT).show()
+                return
+            }
+            value
         } else {
             timerPresets[timerSlider.value.toInt()]
         }
@@ -346,7 +355,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Maximum 5 monsters allowed", Toast.LENGTH_SHORT).show()
             return
         }
-        pickMedia.launch("*/*")
+        pickMedia.launch("image/*")
     }
 
     private fun addMonsterFromUri(uri: Uri) {
