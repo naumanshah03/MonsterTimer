@@ -1,6 +1,7 @@
 package com.monstertimer.app.service
 
 import android.app.Notification
+import com.monstertimer.app.data.PersistentTimerState
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -270,7 +271,6 @@ class MonsterOverlayService : Service() {
             setOnClickListener {
                 if (pinInput.text.toString() == correctPin) {
                     Log.d(TAG, "PIN correct - showing action panel")
-                    ShortsAccessibilityService.isParentBypassed = true
                     SoundManager.releaseMediaPlayer()
                     // Remove PIN container and show action buttons
                     (overlayView as? LinearLayout)?.removeView(pinContainer)
@@ -363,6 +363,10 @@ class MonsterOverlayService : Service() {
     }
 
     private fun dismissOverlay() {
+        // Reset parent bypass so monitoring resumes with a fresh timer
+        ShortsAccessibilityService.isParentBypassed = false
+        // Clear expired timer state so child gets a brand new timer next time
+        PersistentTimerState.clear(this)
         try {
             windowManager?.removeView(overlayView)
             overlayView = null
