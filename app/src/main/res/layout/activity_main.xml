@@ -73,6 +73,57 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Monitoring Control Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.MonsterTimer.Card.Section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_md">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/surface_variant"
+                    android:paddingHorizontal="@dimen/card_header_padding_horizontal"
+                    android:paddingVertical="@dimen/card_header_padding_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/monitoring_active"
+                        android:textAppearance="@style/TextAppearance.MonsterTimer.SectionTitle" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/monitoringSwitch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enable Shorts Monitoring"
+                        android:checked="true"
+                        android:textColor="@color/text_primary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:text="@string/monitoring_caption"
+                        android:textAppearance="@style/TextAppearance.MonsterTimer.Caption" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Permission Status Card -->
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.MonsterTimer.Card.Section"

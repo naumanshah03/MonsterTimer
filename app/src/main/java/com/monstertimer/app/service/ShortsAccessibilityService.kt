@@ -44,6 +44,9 @@ class ShortsAccessibilityService : AccessibilityService() {
             private set
 
         var isParentBypassed = false
+
+        // Cached monitoring flag — updated by MainActivity toggle, loaded on service connect
+        var monitoringEnabled = true
     }
 
     private var countdownTimer: CountDownTimer? = null
@@ -66,6 +69,13 @@ class ShortsAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         isServiceRunning = true
         Log.d(TAG, "Accessibility Service connected")
+        // Load monitoring flag once at connect time
+        try {
+            monitoringEnabled = AppSettings.load(this).monitoringEnabled
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load settings on connect", e)
+            monitoringEnabled = true
+        }
         restoreTimerState()
     }
 
@@ -74,9 +84,41 @@ class ShortsAccessibilityService : AccessibilityService() {
 
         if (isParentBypassed) return
 
-        if (event.packageName?.toString() != YOUTUBE_PACKAGE) {
-            if (isShortsDetected) {
-                Log.d(TAG, "Left YouTube - Saving timer state")
+        // v1.1: Use cached monitoring flag (no expensive AppSettings.load on every event)
+        if (!monitoringEnabled) return
+
+        try {
+            if (event.packageName?.toString() != YOUTUBE_PACKAGE) {
+                if (isShortsDetected) {
+                    Log.d(TAG, "Left YouTube - Saving timer state")
+                    saveTimerState()
+                    pauseTimer()
+                    isShortsDetected = false
+
+                    if (sessionStartTime > 0) {
+                        val sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000
+                        updateUsageStats(sessionDuration)
+                        sessionStartTime = 0
+                    }
+                }
+                hideMonsterOverlay()
+                return
+            }
+
+            val now = System.currentTimeMillis()
+            if (now - lastCheckedTimestamp < 500) return
+            lastCheckedTimestamp = now
+
+            val rootNode = rootInActiveWindow ?: return
+            val shortsDetected = detectShorts(rootNode)
+
+            if (shortsDetected && !isShortsDetected) {
+                Log.d(TAG, "Shorts DETECTED - Starting/Resuming timer")
+                isShortsDetected = true
+                sessionStartTime = System.currentTimeMillis()
+                startOrResumeTimer()
+            } else if (!shortsDetected && isShortsDetected) {
+                Log.d(TAG, "Left Shorts section - Pausing timer")
                 saveTimerState()
                 pauseTimer()
                 isShortsDetected = false
@@ -86,36 +128,10 @@ class ShortsAccessibilityService : AccessibilityService() {
                     updateUsageStats(sessionDuration)
                     sessionStartTime = 0
                 }
+                hideMonsterOverlay()
             }
-            hideMonsterOverlay()
-            return
-        }
-
-        val now = System.currentTimeMillis()
-        if (now - lastCheckedTimestamp < 500) return
-        lastCheckedTimestamp = now
-
-        val rootNode = rootInActiveWindow ?: return
-        val shortsDetected = detectShorts(rootNode)
-        // No need to recycle rootNode here, detectShorts handles all recycling
-
-        if (shortsDetected && !isShortsDetected) {
-            Log.d(TAG, "Shorts DETECTED - Starting/Resuming timer")
-            isShortsDetected = true
-            sessionStartTime = System.currentTimeMillis()
-            startOrResumeTimer()
-        } else if (!shortsDetected && isShortsDetected) {
-            Log.d(TAG, "Left Shorts section - Pausing timer")
-            saveTimerState()
-            pauseTimer()
-            isShortsDetected = false
-
-            if (sessionStartTime > 0) {
-                val sessionDuration = (System.currentTimeMillis() - sessionStartTime) / 1000
-                updateUsageStats(sessionDuration)
-                sessionStartTime = 0
-            }
-            hideMonsterOverlay()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing accessibility event", e)
         }
     }
 

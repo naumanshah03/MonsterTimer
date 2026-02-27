@@ -269,10 +269,12 @@ class MonsterOverlayService : Service() {
             setTextColor(resources.getColor(R.color.white, null))
             setOnClickListener {
                 if (pinInput.text.toString() == correctPin) {
-                    Log.d(TAG, "PIN correct - Parent bypass activated")
+                    Log.d(TAG, "PIN correct - showing action panel")
                     ShortsAccessibilityService.isParentBypassed = true
                     SoundManager.releaseMediaPlayer()
-                    dismissOverlay()
+                    // Remove PIN container and show action buttons
+                    (overlayView as? LinearLayout)?.removeView(pinContainer)
+                    showPostPinActions()
                 } else {
                     pinInput.error = "Wrong PIN"
                     pinInput.text.clear()
@@ -284,6 +286,80 @@ class MonsterOverlayService : Service() {
 
         // Find root and add PIN container
         (overlayView as? LinearLayout)?.addView(pinContainer)
+    }
+
+    private fun showPostPinActions() {
+        val actionContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(48, 32, 48, 32)
+            setBackgroundColor(resources.getColor(R.color.purple_700, null))
+        }
+
+        val actionLabel = TextView(this).apply {
+            text = "What would you like to do?"
+            textSize = 18f
+            setTextColor(resources.getColor(R.color.white, null))
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 24)
+        }
+        actionContainer.addView(actionLabel)
+
+        // Close button
+        val closeButton = Button(this).apply {
+            text = getString(R.string.overlay_close)
+            setBackgroundColor(resources.getColor(R.color.teal_700, null))
+            setTextColor(resources.getColor(R.color.white, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = 16 }
+            setOnClickListener {
+                Log.d(TAG, "Close tapped - dismissing overlay")
+                dismissOverlay()
+            }
+        }
+        actionContainer.addView(closeButton)
+
+        // Disable Monitoring button
+        val disableButton = Button(this).apply {
+            text = getString(R.string.overlay_disable)
+            setBackgroundColor(resources.getColor(R.color.secondary_variant, null))
+            setTextColor(resources.getColor(R.color.white, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = 16 }
+            setOnClickListener {
+                Log.d(TAG, "Disable Monitoring tapped")
+                val settings = AppSettings.load(this@MonsterOverlayService)
+                AppSettings.save(this@MonsterOverlayService, settings.copy(monitoringEnabled = false))
+                dismissOverlay()
+            }
+        }
+        actionContainer.addView(disableButton)
+
+        // Open Settings button
+        val settingsButton = Button(this).apply {
+            text = getString(R.string.overlay_open_settings)
+            setBackgroundColor(resources.getColor(R.color.surface_variant, null))
+            setTextColor(resources.getColor(R.color.white, null))
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            setOnClickListener {
+                Log.d(TAG, "Open Settings tapped")
+                val intent = Intent(this@MonsterOverlayService, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+                startActivity(intent)
+                dismissOverlay()
+            }
+        }
+        actionContainer.addView(settingsButton)
+
+        (overlayView as? LinearLayout)?.addView(actionContainer)
     }
 
     private fun dismissOverlay() {

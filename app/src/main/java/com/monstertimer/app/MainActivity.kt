@@ -33,6 +33,7 @@ import com.monstertimer.app.service.ShortsAccessibilityService
 import java.io.File
 import java.io.FileOutputStream
 import android.widget.ScrollView
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var manualRadioButton: RadioButton
     private lateinit var manualTimerInputLayout: TextInputLayout
     private lateinit var manualTimerEditText: TextInputEditText
+    private lateinit var monitoringSwitch: SwitchMaterial
 
     private val monsterAdapter = MonsterGalleryAdapter()
     private var currentSettings = AppSettings()
@@ -138,6 +140,7 @@ class MainActivity : AppCompatActivity() {
         manualRadioButton = findViewById(R.id.manualRadioButton)
         manualTimerInputLayout = findViewById(R.id.manualTimerInputLayout)
         manualTimerEditText = findViewById(R.id.manualTimerEditText)
+        monitoringSwitch = findViewById(R.id.monitoringSwitch)
         
         // PIN
         pinEditText = findViewById(R.id.pinEditText)
@@ -202,6 +205,15 @@ class MainActivity : AppCompatActivity() {
         overlayButton.setOnClickListener { requestOverlayPermission() }
         addMonsterButton.setOnClickListener { pickMonsterMedia() }
         saveButton.setOnClickListener { saveSettings() }
+
+        // Monitoring toggle - saves immediately and updates service cache
+        monitoringSwitch.setOnCheckedChangeListener { _, isChecked ->
+            currentSettings = currentSettings.copy(monitoringEnabled = isChecked)
+            AppSettings.save(this, currentSettings)
+            ShortsAccessibilityService.monitoringEnabled = isChecked
+            val status = if (isChecked) "Monitoring enabled" else "Monitoring disabled"
+            Toast.makeText(this, status, Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun loadSettings() {
@@ -225,6 +237,7 @@ class MainActivity : AppCompatActivity() {
         
         pinEditText.setText(currentSettings.parentPin)
         monsterAdapter.updateData(currentSettings.monsterPaths)
+        monitoringSwitch.isChecked = currentSettings.monitoringEnabled
     }
 
     private fun saveSettings() {
@@ -325,9 +338,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Only request POST_NOTIFICATIONS.
+            // READ_MEDIA_IMAGES/VIDEO are NOT needed because we use GetContent() picker,
+            // and on Android 14+ Samsung they trigger the photo-picker UI which confuses users.
             val permissions = arrayOf(
-                Manifest.permission.READ_MEDIA_IMAGES,
-                Manifest.permission.READ_MEDIA_VIDEO,
                 Manifest.permission.POST_NOTIFICATIONS
             )
             val needed = permissions.filter {

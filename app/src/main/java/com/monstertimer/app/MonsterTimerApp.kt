@@ -40,7 +40,8 @@ data class AppSettings(
     val parentPin: String = "1234",
     val monsterPaths: List<String> = emptyList(),
     val isManualTimer: Boolean = false,
-    val eulaAccepted: Boolean = false
+    val eulaAccepted: Boolean = false,
+    val monitoringEnabled: Boolean = true
 ) {
     companion object {
         private const val KEY_TIMER_MINUTES = "timer_minutes"
@@ -48,6 +49,7 @@ data class AppSettings(
         private const val KEY_MONSTER_PATHS = "monster_paths"
         private const val KEY_IS_MANUAL_TIMER = "is_manual_timer"
         private const val KEY_EULA_ACCEPTED = "eula_accepted"
+        private const val KEY_MONITORING_ENABLED = "monitoring_enabled"
         
         fun load(context: Context): AppSettings {
             val prefs = MonsterTimerApp.getSecurePrefs(context)
@@ -59,7 +61,8 @@ data class AppSettings(
                     ?.filter { it.isNotBlank() }
                     ?: emptyList(),
                 isManualTimer = prefs.getBoolean(KEY_IS_MANUAL_TIMER, false),
-                eulaAccepted = prefs.getBoolean(KEY_EULA_ACCEPTED, false)
+                eulaAccepted = prefs.getBoolean(KEY_EULA_ACCEPTED, false),
+                monitoringEnabled = prefs.getBoolean(KEY_MONITORING_ENABLED, true)
             )
         }
         
@@ -71,6 +74,7 @@ data class AppSettings(
                 .putString(KEY_MONSTER_PATHS, settings.monsterPaths.joinToString("|"))
                 .putBoolean(KEY_IS_MANUAL_TIMER, settings.isManualTimer)
                 .putBoolean(KEY_EULA_ACCEPTED, settings.eulaAccepted)
+                .putBoolean(KEY_MONITORING_ENABLED, settings.monitoringEnabled)
                 .apply()
         }
     }
