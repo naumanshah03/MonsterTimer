@@ -355,11 +355,17 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Maximum 5 monsters allowed", Toast.LENGTH_SHORT).show()
             return
         }
-        pickMedia.launch("image/*")
+        pickMedia.launch("*/*")
     }
 
     private fun addMonsterFromUri(uri: Uri) {
         try {
+            val mimeType = contentResolver.getType(uri) ?: ""
+            if (!mimeType.startsWith("image/") && !mimeType.startsWith("video/")) {
+                Toast.makeText(this, "Please select an image or video", Toast.LENGTH_SHORT).show()
+                return
+            }
+
             val inputStream = contentResolver.openInputStream(uri) ?: return
             val fileName = "monster_${System.currentTimeMillis()}.${getExtension(uri)}"
             val file = File(filesDir, fileName)
