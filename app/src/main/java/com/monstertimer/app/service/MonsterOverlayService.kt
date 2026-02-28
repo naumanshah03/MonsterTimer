@@ -8,6 +8,9 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.graphics.PixelFormat
+import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
@@ -57,10 +60,34 @@ class MonsterOverlayService : Service() {
         startForeground(NOTIFICATION_ID, createNotification())
         showOverlay()
         
+        // Pause YouTube video by stealing audio focus
+        pauseMediaPlayback()
+        
         // Play scary sound!
         SoundManager.playMonsterSound(this)
         
         return START_NOT_STICKY
+    }
+
+    /**
+     * Steal audio focus to force YouTube to pause its video.
+     */
+    private fun pauseMediaPlayback() {
+        try {
+            val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+            val focusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+                .build()
+            audioManager.requestAudioFocus(focusRequest)
+            Log.d(TAG, "Audio focus requested - YouTube should pause")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to request audio focus", e)
+        }
     }
 
     private fun createNotificationChannel() {
@@ -315,7 +342,8 @@ class MonsterOverlayService : Service() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { bottomMargin = 16 }
             setOnClickListener {
-                Log.d(TAG, "Close tapped - dismissing overlay")
+                Log.d(TAG, "Close tapped - dismissing overlay and going home")
+                goToHomeScreen()
                 dismissOverlay()
             }
         }
@@ -362,6 +390,22 @@ class MonsterOverlayService : Service() {
         actionContainer.addView(settingsButton)
 
         (overlayView as? LinearLayout)?.addView(actionContainer)
+    }
+
+    /**
+     * Navigate to the home screen, sending YouTube to the background.
+     */
+    private fun goToHomeScreen() {
+        try {
+            val homeIntent = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(homeIntent)
+            Log.d(TAG, "Navigated to home screen")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to go to home screen", e)
+        }
     }
 
     private fun dismissOverlay() {
