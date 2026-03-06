@@ -53,10 +53,17 @@ data class AppSettings(
             return AppSettings(
                 timerMinutes = prefs.getInt(KEY_TIMER_MINUTES, 10),
                 parentPin = prefs.getString(KEY_PIN, "1234") ?: "1234",
-                monsterPaths = prefs.getString(KEY_MONSTER_PATHS, "")
-                    ?.split(":::")
-                    ?.filter { it.isNotBlank() }
-                    ?: emptyList(),
+                monsterPaths = run {
+                    val raw = prefs.getString(KEY_MONSTER_PATHS, "") ?: ""
+                    if (raw.isBlank()) return@run emptyList()
+                    // Try new separator first, fall back to old | separator for migration
+                    val parts = raw.split(":::")
+                    if (parts.size == 1 && parts[0].contains("|")) {
+                        raw.split("|").filter { it.isNotBlank() }
+                    } else {
+                        parts.filter { it.isNotBlank() }
+                    }
+                },
                 isManualTimer = prefs.getBoolean(KEY_IS_MANUAL_TIMER, false),
                 eulaAccepted = prefs.getBoolean(KEY_EULA_ACCEPTED, false),
                 monitoringEnabled = prefs.getBoolean(KEY_MONITORING_ENABLED, true)

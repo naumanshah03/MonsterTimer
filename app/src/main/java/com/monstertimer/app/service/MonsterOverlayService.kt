@@ -124,6 +124,12 @@ class MonsterOverlayService : Service() {
     }
 
     private fun showOverlay() {
+        // Fix 6: Guard against double overlay
+        if (overlayView != null) {
+            Log.w(TAG, "Overlay already showing, skipping")
+            return
+        }
+
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         
         val params = WindowManager.LayoutParams(
@@ -413,6 +419,8 @@ class MonsterOverlayService : Service() {
         ShortsAccessibilityService.isParentBypassed = false
         // Clear expired timer state so child gets a brand new timer next time
         PersistentTimerState.clear(this)
+        // Reset all in-memory timer flags in the accessibility service
+        ShortsAccessibilityService.resetForFreshTimer()
         try {
             windowManager?.removeView(overlayView)
             overlayView = null

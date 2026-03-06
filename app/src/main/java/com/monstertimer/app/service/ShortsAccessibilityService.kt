@@ -47,6 +47,20 @@ class ShortsAccessibilityService : AccessibilityService() {
 
         // Cached monitoring flag — updated by MainActivity toggle, loaded on service connect
         var monitoringEnabled = true
+
+        // Set by MonsterOverlayService to prevent hideMonsterOverlay() from killing the overlay
+        var isOverlayShowing = false
+
+        // Reference to the running service instance for resetting timer state from overlay
+        private var serviceInstance: ShortsAccessibilityService? = null
+
+        /**
+         * Called from MonsterOverlayService.dismissOverlay() to reset all in-memory timer state.
+         * This ensures the next Shorts visit starts a fresh timer.
+         */
+        fun resetForFreshTimer() {
+            serviceInstance?.resetInMemoryTimerState()
+        }
     }
 
     private var countdownTimer: CountDownTimer? = null
@@ -68,6 +82,7 @@ class ShortsAccessibilityService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         isServiceRunning = true
+        serviceInstance = this
         Log.d(TAG, "Accessibility Service connected")
         // Load monitoring flag once at connect time
         try {
@@ -101,7 +116,7 @@ class ShortsAccessibilityService : AccessibilityService() {
                         sessionStartTime = 0
                     }
                 }
-                hideMonsterOverlay()
+                if (!isOverlayShowing) hideMonsterOverlay()
                 return
             }
 
@@ -128,7 +143,7 @@ class ShortsAccessibilityService : AccessibilityService() {
                     updateUsageStats(sessionDuration)
                     sessionStartTime = 0
                 }
-                hideMonsterOverlay()
+                if (!isOverlayShowing) hideMonsterOverlay()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error processing accessibility event", e)
@@ -137,12 +152,12 @@ class ShortsAccessibilityService : AccessibilityService() {
 
     private fun detectShorts(rootNode: AccessibilityNodeInfo): Boolean {
         val queue = LinkedList<AccessibilityNodeInfo>()
-        val visitedNodes = mutableListOf<AccessibilityNodeInfo>()
+        val childNodes = mutableListOf<AccessibilityNodeInfo>()
         var shortsFound = false
 
         try {
             queue.add(rootNode)
-            visitedNodes.add(rootNode)
+            // Do NOT add rootNode to childNodes — it belongs to the system and must not be recycled
 
             while (queue.isNotEmpty()) {
                 val node = queue.poll() ?: continue
@@ -166,15 +181,15 @@ class ShortsAccessibilityService : AccessibilityService() {
                 for (i in 0 until node.childCount) {
                     val child = node.getChild(i)
                     if (child != null) {
-                        visitedNodes.add(child)
+                        childNodes.add(child)
                         queue.add(child)
                     }
                 }
             }
         } finally {
-            // Safely recycle all nodes that were touched during the traversal.
-            for (node in visitedNodes) {
-                node.recycle()
+            // Only recycle child nodes we obtained via getChild(), NOT the rootNode
+            for (node in childNodes) {
+                try { node.recycle() } catch (_: Exception) {}
             }
         }
         return shortsFound
@@ -210,8 +225,13 @@ class ShortsAccessibilityService : AccessibilityService() {
         currentRemainingMillis = if (adjustedRemaining > 0) {
             adjustedRemaining
         } else {
-            val settings = AppSettings.load(this)
-            settings.timerMinutes * 60 * 1000L
+            val timerMinutes = try {
+                AppSettings.load(this).timerMinutes
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load settings for timer", e)
+                10 // default fallback
+            }
+            timerMinutes * 60 * 1000L
         }
 
         twoMinuteWarningShown = false
@@ -359,12 +379,31 @@ class ShortsAccessibilityService : AccessibilityService() {
     }
 
     private fun showMonsterOverlay() {
+        isOverlayShowing = true
         val intent = Intent(this, MonsterOverlayService::class.java)
         startForegroundService(intent)
     }
 
     private fun hideMonsterOverlay() {
+        if (isOverlayShowing) return // Don't kill overlay while parent is interacting
         stopService(Intent(this, MonsterOverlayService::class.java))
+    }
+
+    /**
+     * Resets all in-memory timer state so the next Shorts visit starts a fresh timer.
+     * Called from MonsterOverlayService.dismissOverlay() via companion.
+     */
+    fun resetInMemoryTimerState() {
+        countdownTimer?.cancel()
+        countdownTimer = null
+        isTimerRunning = false
+        isShortsDetected = false
+        currentRemainingMillis = 0
+        twoMinuteWarningShown = false
+        oneMinuteWarningShown = false
+        isOverlayShowing = false
+        hideTimerStatusNotification()
+        Log.d(TAG, "In-memory timer state reset for fresh start")
     }
 
     fun onStoppedEarly() {
@@ -384,8 +423,13 @@ class ShortsAccessibilityService : AccessibilityService() {
     override fun onDestroy() {
         super.onDestroy()
         isServiceRunning = false
-        saveTimerState()
-        cancelTimer()
+        serviceInstance = null
+        // Save state but don't clear it — the timer may need to resume after service restart
+        if (isTimerRunning) saveTimerState()
+        countdownTimer?.cancel()
+        countdownTimer = null
+        isTimerRunning = false
+        hideTimerStatusNotification()
         SoundManager.releaseMediaPlayer()
         Log.d(TAG, "Service destroyed")
     }

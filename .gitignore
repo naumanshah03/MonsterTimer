@@ -27,3 +27,7 @@ local.properties
 
 # Logs
 *.log
+
+# IDE
+.vscode/
+.gemini/
