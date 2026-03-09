@@ -247,7 +247,7 @@ class MainActivity : AppCompatActivity() {
         }
         
         // Button click listeners
-        accessibilityButton.setOnClickListener { openAccessibilitySettings() }
+        accessibilityButton.setOnClickListener { openAccessibilitySettings(ShortsAccessibilityService.isServiceRunning) }
         overlayButton.setOnClickListener { requestOverlayPermission() }
         addMonsterButton.setOnClickListener { pickMonsterMedia() }
         saveButton.setOnClickListener { saveSettings() }
@@ -423,20 +423,29 @@ class MainActivity : AppCompatActivity() {
         
         statusText.text = status.toString()
         
-        accessibilityButton.visibility = if (accessibilityEnabled) View.GONE else View.VISIBLE
+        accessibilityButton.visibility = View.VISIBLE
+        accessibilityButton.text = if (accessibilityEnabled) "Disable Accessibility Service" else "Enable Accessibility Service"
+        
         overlayButton.visibility = if (overlayEnabled) View.GONE else View.VISIBLE
         
         if (accessibilityEnabled && overlayEnabled) {
             statusText.setTextColor(ContextCompat.getColor(this, R.color.success))
         } else {
-            statusText.setTextColor(ContextCompat.getColor(this, R.color.error))
+            statusText.setTextColor(ContextCompat.getColor(this, R.color.text_primary)) // Use primary instead of error since disabled isn't necessarily an error anymore
         }
     }
 
-    private fun openAccessibilitySettings() {
+    private fun openAccessibilitySettings(isEnabled: Boolean) {
+        val title = if (isEnabled) "Disable Accessibility Service" else "Enable Accessibility Service"
+        val message = if (isEnabled) {
+            "Please find 'Monster Timer' in the list and disable it."
+        } else {
+            "Please find 'Monster Timer' in the list and enable it."
+        }
+        
         AlertDialog.Builder(this, com.google.android.material.R.style.ThemeOverlay_Material3_MaterialAlertDialog)
-            .setTitle("Enable Accessibility Service")
-            .setMessage("Please find 'Monster Timer' in the list and enable it.")
+            .setTitle(title)
+            .setMessage(message)
             .setPositiveButton("Open Settings") { _, _ ->
                 startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
             }
